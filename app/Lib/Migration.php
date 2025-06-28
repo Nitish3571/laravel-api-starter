@@ -3,6 +3,8 @@
 
 namespace App\Lib;
 
+use Illuminate\Support\Facades\DB;
+
 
 class Migration
 {
@@ -16,11 +18,12 @@ class Migration
         $table->timestamps();
         $table->softDeletes();
 
-        $database = config('database.connections.mysql.database');
-        // $database = 'ucsapp';
-        $table->foreign('created_by')->on("$database.users")->references('id')->cascadeOnDelete();
-        $table->foreign('updated_by')->on("$database.users")->references('id')->cascadeOnDelete();
-        $table->foreign('deleted_by')->on("$database.users")->references('id')->cascadeOnDelete();
+        $usersTable = DB::getDriverName() === 'sqlite' ? 'users' : config('database.connections.mysql.database') . '.users';
+
+        $table->foreign('created_by')->references('id')->on($usersTable)->cascadeOnDelete();
+        $table->foreign('updated_by')->references('id')->on($usersTable)->cascadeOnDelete();
+        $table->foreign('deleted_by')->references('id')->on($usersTable)->cascadeOnDelete();
     }
+
 
 }
