@@ -18,11 +18,11 @@ class Migration
         $table->timestamps();
         $table->softDeletes();
 
-        $usersTable = DB::getDriverName() === 'sqlite' ? 'users' : config('database.connections.mysql.database') . '.users';
+        // $usersTable = DB::getDriverName() === 'sqlite' ? 'users' : config('database.connections.mysql.database') . '.users';
 
-        $table->foreign('created_by')->references('id')->on($usersTable)->cascadeOnDelete();
-        $table->foreign('updated_by')->references('id')->on($usersTable)->cascadeOnDelete();
-        $table->foreign('deleted_by')->references('id')->on($usersTable)->cascadeOnDelete();
+        // $table->foreign('created_by')->references('id')->on($usersTable)->cascadeOnDelete();
+        // $table->foreign('updated_by')->references('id')->on($usersTable)->cascadeOnDelete();
+        // $table->foreign('deleted_by')->references('id')->on($usersTable)->cascadeOnDelete();
     }
 
 
