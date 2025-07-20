@@ -3,9 +3,19 @@
 namespace App\Lib;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class ApiResponse
 {
+    public static function res($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'statusCode' => $statusCode,
+            'message' => $message,
+            'data' => $data,
+        ], $statusCode);
+    }
     public static function success($data = null, string $message = 'Success', int $statusCode = 200): JsonResponse
     {
         return response()->json([
@@ -18,12 +28,19 @@ class ApiResponse
 
     public static function error(string $message = 'Error', $data = null, int $statusCode = 400): JsonResponse
     {
-        return response()->json([
-            'status' => false,
-            'message' => $message,
+        $res = [];
+        $res['status'] = false;
+        $res['message'] = $message;
+        if ($data != null || $data != []) {
+            $res['data'] = $data;
+        }
+        $res['statusCode'] = $statusCode;
+
+        Log::error($message, [
             'data' => $data,
-            'statusCode' => $statusCode
-        ], $statusCode);
+            'statusCode' => $statusCode,
+        ]);
+        return response()->json($res, $statusCode);
     }
 
     public static function unauthorized(string $message = 'Unauthorized'): JsonResponse

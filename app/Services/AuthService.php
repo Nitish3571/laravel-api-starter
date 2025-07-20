@@ -4,10 +4,12 @@
 namespace App\Services;
 
 use App\Enums\StatusEnum;
+use App\Enums\UserTypeEnum;
 use App\Lib\ApiResponse;
 use App\Models\LoginHistory;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\UserRepository;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -26,7 +28,7 @@ class AuthService
         $user = $this->userRepository->create($data);
 
         // Assign default role
-        $user->assignRole('user');
+        $user->assignRole(UserTypeEnum::USER_TYPE_NAMES);
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $this->createLoginHistory($user, request());
@@ -42,10 +44,11 @@ class AuthService
         $user = $this->userRepository->findByEmail($credentials['email']);
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            throw new HttpResponseException(
+                ApiResponse::error("The provided credentials are incorrect.")
+            );
         }
+
 
         // if ($user->status !== 'active') {
         //     throw ValidationException::withMessages([
@@ -59,6 +62,7 @@ class AuthService
         // $this->userRepository->updateLastLogin($user->id);
         $this->createLoginHistory($user, request());
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->load(['roles', 'roles.permissions', 'permissions']);
 
         return [
             'user' => $user,

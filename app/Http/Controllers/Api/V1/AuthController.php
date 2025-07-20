@@ -77,6 +77,10 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
+        info('Login attempt', [
+            'email' => $request->input('email'),
+            'timestamp' => now(),
+        ]);
         $result = $this->authService->login($request->validated());
 
         return ApiResponse::success([

@@ -3,6 +3,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserTypeEnum;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -21,12 +22,12 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($modules as $moduleData) {
-            $module = Module::create($moduleData);
+            $module = Module::firstOrCreate($moduleData);
 
             // Create permissions for each module
             $permissions = ['view', 'create', 'edit', 'delete'];
             foreach ($permissions as $permission) {
-                Permission::create([
+                Permission::firstOrCreate([
                     'name' =>  $moduleData['slug'] . '_' . $permission,
                     'guard_name' => 'web',
                     'module_id' => $module->id,
@@ -36,26 +37,21 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Create roles
-        $adminRole = Role::create(['name' => 'admin']);
-        $managerRole = Role::create(['name' => 'manager']);
-        $userRole = Role::create(['name' => 'user']);
+        $adminRole = Role::firstOrCreate(['name' => UserTypeEnum::SUPER_ADMIN_TYPE_NAME]);
+        $adminRole = Role::firstOrCreate(['name' => UserTypeEnum::ADMIN_TYPE_NAME]);
+        $userRole = Role::firstOrCreate(['name' => UserTypeEnum::USER_TYPE_NAME]);
 
         // Assign all permissions to admin
         $adminRole->givePermissionTo(Permission::all());
 
-        // Assign limited permissions to manager
-        $managerRole->givePermissionTo([
-            'users_view', 'users_create', 'users_edit',
-            'roles_view', 'permissions_view'
-        ]);
 
         // Create admin user
-        $admin = \App\Models\User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-            'status' => 1
-        ]);
-        $admin->assignRole('admin');
+        // $admin = \App\Models\User::create([
+        //     'name' => 'Admin User',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('password'),
+        //     'status' => 1
+        // ]);
+        // $admin->assignRole('admin');
     }
 }
